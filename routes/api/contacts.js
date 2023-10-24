@@ -1,37 +1,20 @@
-const express = require("express");
-
-const contactsController = require("../../controllers/contacts-controller");
-
-const { schemas } = require("../../models/contact");
-const { validateBody } = require("../../decorators");
-const { isValidId } = require("../../middlewares");
+import express from "express";
+import ctrl from "../../controllers/contacts/index.js";
+import {validateBody, isEmptyBody, isValidId, authenticate,} from "../../middlewares/index.js";
+import {addSchema, updateFavoriteSchema} from "../../schemas/index.js";
 
 const router = express.Router();
 
-router.get("/", contactsController.getAllContacts);
+router.get("/", authenticate, ctrl.getAllContacts);
 
-router.get("/:id", isValidId, contactsController.getContactById);
+router.get("/:contactId", authenticate, ctrl.getContactById);
 
-router.post(
-  "/",
-  validateBody(schemas.contactAddSchema),
-  contactsController.addContact
-);
+router.post("/", authenticate, isEmptyBody, validateBody(addSchema), ctrl.addContact);
 
-router.delete("/:id", isValidId, contactsController.removeContact);
+router.delete("/:contactId", authenticate, isValidId, ctrl.deleteContactById);
 
-router.put(
-  "/:id",
-  isValidId,
-  validateBody(schemas.contactAddSchema),
-  contactsController.updateContact
-);
+router.put("/:contactId", authenticate, isValidId, isEmptyBody, validateBody(addSchema), ctrl.updateContactById);
 
-router.patch(
-  "/:id/favorite",
-  isValidId,
-  validateBody(schemas.updateFavoriteSchema),
-  contactsController.updateStatusContact
-);
+router.patch("/:contactId/favorite", authenticate, isValidId, isEmptyBody, validateBody(updateFavoriteSchema), ctrl.updateStatusContact);
 
-module.exports = router;
+export default router;
